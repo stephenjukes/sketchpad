@@ -1,0 +1,252 @@
+<html>
+  <head>
+    <title>Lesson 1</title>
+    <link href="day.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+          <h1>Sketchpad</h1>
+          <div id="buttons">
+              <button id="waterColors">Water Colors</button>
+              <button id="markerPen">Marker Pen</button>
+              <button id="flashyPen">Flashy Pen</button>
+              <button id="addColor">Add Color</button>
+              <button id="clear">Clear</button>
+          </div>
+          <div id="options">
+              <div id="colors">
+                  <div class="palette red"></div>
+                  <div class="palette blue"></div>
+                  <div class="palette green"></div>
+                  <div class="palette yellow"></div>
+              </div>
+              <div id="newColors">
+                  <div id="newPalette"></div>
+                  <div class="possColor cancel">
+                      <div><p>Cancel</p></div>
+                  </div>
+              </div>
+          </div>
+          <section></section>
+
+<!-- Tutorial instructions -->
+          <div class="tail"></div>
+          <div class="inner"></div>
+          <div class="tut" data-type=".blue"> The default colour is blue. Mouse across the sketchpad to see the effect.</div>
+          <div class="tut" data-type=".red">You can change the color by clicking on another palette. By clicking red, mouse over the sketchpad again.</div>
+          <div class="tut" data-type="#addColor">If the palette colors are insufficient, you can call a substitute palette by clicking here.</div>
+          <div class="tut" data-type=".cancel">If you decide not to select a new color, simply click here to cancel</div>
+          <div class="tut" data-type=".possColor">Notice that by hovering over the substitute palette how the "cancel" button provides a sample of your potential color</div>
+          <div class="tut" data-type="red">Once you find the color you want, simply click on your current position</div>
+          <div class="tut" data-type="red">Notice how your selected color is added to the end of your working palette. It is also automatically selected for you. Mouse over the sketchpad to see.</div>
+          <div class="tut" data-type="red">If you find that your working palette is becoming too crowded, you can also remove these by double clicking on them. (Original colors cannot be deleted)</div>
+          <div class="tut" data-type="red">Time for you to get started. Good luck!</div>
+
+    <script src="jquery-2.2.0.js"></script>
+    <script>
+
+
+
+        var promptSize = prompt('Select a grid size (default = 100)');
+        var color = 'blue';
+        var section = $('section');
+
+// Asking whether a tutorial is needed
+
+
+// Board generation
+        function setSize (size) {
+            for (i = 1; i<= size; i++) {
+                for (j = 1; j <= size; j++) {
+                    section
+                        .append($('<div></div>')
+                            .data('divObject', {opacity:0})
+                            .css({
+                                'height':600 / size,
+                                'width':600 / size
+                            })
+                        .addClass('gridDiv')
+                        );
+                }
+            }
+        };
+
+        setSize(promptSize || 100);
+
+$('#colors').on('click', '.palette, .tempColor', function(){
+    var col = $(this);
+    col.siblings().css('box-shadow','none');
+    col.css('box-shadow','0 0 20px black');
+    color = col.css('background');
+});
+
+// Choosing pen style by button
+        var pen = 'marker';
+
+        $('#markerPen').on('click', function(){
+            return pen = 'marker'
+        });
+
+        $('#waterColors').on('click', function(){
+            return pen = 'water';
+        });
+
+        $('#flashyPen').on('click', function(){
+            return pen = 'flashy';
+        });
+
+// Painting according to pen
+        section.
+            on('mouseenter', 'div', function(){
+                // marker pen
+                if (pen === 'marker') {
+                    $(this).css('background', color)
+                }
+                // water colors
+                else if (pen === 'water') {
+                    var thisOpacity = $(this).data('divObject').opacity;
+                    $(this).data('divObject', {opacity: thisOpacity + 0.25});
+
+                    $(this).css({
+                        'background': color,
+                        'opacity': $(this).data('divObject').opacity
+                    })
+                }
+                // flashy pen
+                else if (pen === 'flashy') {
+                    var rand1 = Math.ceil(Math.random()*256);
+                    var rand2 = Math.ceil(Math.random()*256);
+                    var rand3 = Math.ceil(Math.random()*256);
+
+                    $(this).css('background', 'rgb(' + rand1 + ', ' + rand2 + ', ' + rand3 + ')');
+                }
+            });
+
+// Board reset
+        $('#clear').on('click', function() {
+            section.empty();
+            $('.tempColor').remove();
+            promptSize = prompt('Select a grid size (default = 100)');
+            setSize(promptSize || 100);
+        });
+
+// Generation of substitute palette colors
+        var step = 0.05;
+
+        for (i = 0; i < 6.3; i += step) {
+            var red =   Math.floor(Math.sin(i + 2) * 127 + 128);
+            var green = Math.floor(Math.sin(i + 0) * 127 + 128);
+            var blue =  Math.floor(Math.sin(i + 4) * 127 + 128);
+            var colorQty = 6.3 / step;
+
+            $('#newPalette')
+                .append($('<div></div>')
+                    .css({
+                        'height':'40px',
+                        'width': 500 / colorQty,
+                        'display': 'inline-block',
+                        'background': 'rgb(' + red + ', ' + green + ', ' + blue + ')'
+                    })
+                )
+        };
+
+// Calling substitute palette
+        $('#addColor').on('click', function(){
+            $('#colors').animate({'top':'-65px'},'slow');
+            $('#newColors').animate({'top':'0'},'slow');
+        });
+
+// Colour sampling from substitute palette
+        $('#newPalette').on('mouseenter', 'div', function(){
+            $('.possColor')
+                .removeClass('cancel')
+                .addClass('palette')
+                .css('background', $(this).css('background'))
+                .empty(); // 'Cancel' button becomes sample color.
+        });
+
+        $('#newPalette').on('mouseleave', 'div', function(){
+            $('.possColor')
+                .removeClass('palette')
+                .addClass('cancel')
+                .css('background', 'rgb(221,221,221)')
+                .append($('<p>Cancel</p>')); // sample color returns to 'Cancel' button.
+        });
+
+// Exiting substitute palette function
+        var exitPalette = function() {
+            $('#newColors').animate({'top':'60px'}, 'slow')
+            $('#colors').animate({'top':'0'}, 'slow')
+        };
+
+// Adding a new color to palette
+        $('#newPalette').on('click', 'div', function(){
+            $('.palette').siblings().css('box-shadow','none');
+            $('#colors')
+                .append($('<div></div>')
+                    .addClass('tempColor')
+                    .css({
+                        'box-shadow':'0 0 20px black',
+                        'background': $(this).css('background')
+                    })
+                )
+            color = $(this).css('background') // ensures that the pen draws with this color
+
+            exitPalette();
+
+        });
+
+// Exiting substitute palette by cancelling
+        $('.cancel').on('click', function(){
+            exitPalette();
+        });
+
+// Removing added colors from working palette
+        $('#colors').on('dblclick', '.tempColor', function(){
+            $(this).fadeOut(300);
+        });
+
+// *************************************************************************
+// TUTORIAL TUTORIAL TUTORIAL TUTORIAL TUTORIAL TUTORIAL TUTORIAL TUTORIAL
+// *************************************************************************
+
+// Speech bubble generater
+function speechBubble (nth) {
+  var speechData = $('.tut').eq(nth).data('type');
+  var target = $(speechData);
+  var tailTop = target.offset().top - 50;
+  var tailLeft = target.offset().left + 25 * Math.tan(3.14/6);
+
+  target
+    .append($('.tail')
+        .css({
+          'top': '-30px', //tailTop,
+          'left': '35px' //tailLeft
+        })
+     )
+    .append($('.inner')
+         .css({
+            'top':'-30px', //tailTop,
+            'left':'46px' //tailLeft + 11
+          })
+     )
+    .append($('.tut')
+        .eq(nth)
+        .css({
+            'display':'inline-block',
+            'bottom':'55px' //55,
+         })
+     )
+     console.log(speechData);
+     console.log(typeof speechData);
+ };
+
+speechBubble(2);
+
+
+    </script>
+
+
+  </body>
+</html>

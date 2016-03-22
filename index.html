@@ -1,0 +1,197 @@
+<html>
+  <head>
+    <title>Lesson 1</title>
+    <link href="day.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+          <h1>Sketchpad</h1>
+          <div id="buttons">
+              <button id="waterColors">Water Colors</button>
+              <button id="markerPen">Marker Pen</button>
+              <button id="flashyPen">Flashy Pen</button>
+              <button id="addColor">Add Color</button>
+              <button id="clear">Clear</button>
+          </div>
+          <div id="options">
+              <div id="colors">
+                  <div class="palette red"></div>
+                  <div class="palette blue"></div>
+                  <div class="palette green"></div>
+                  <div class="palette yellow"></div>
+              </div>
+              <div id="newColors">
+                  <div id="newPalette"></div>
+                  <div class="possColor cancel">
+                      <div><p>Cancel</p></div>
+                  </div>
+              </div>
+          </div>
+          <section></section>
+
+
+    <script src="jquery-2.2.0.js"></script>
+    <script>
+
+        var color = 'blue';
+        var promptSize = prompt('Select a grid size (default = 100)');
+        var section = $('section');
+
+// Board generation
+        function setSize (size) {
+            for (i = 1; i<= size; i++) {
+                for (j = 1; j <= size; j++) {
+                    section
+                        .append($('<div></div>')
+                            .data('divObject', {opacity:0})
+                            .css({
+                                'height':600 / size,
+                                'width':600 / size
+                            })
+                        .addClass('gridDiv')
+                        );
+                }
+            }
+        };
+
+        setSize(promptSize || 100);
+
+// Color selection from working palette
+        $('#colors').on('click', '.palette, .tempColor', function(){
+            $(this).siblings().css('box-shadow','none');
+            $(this).css('box-shadow','0 0 20px black');
+            color = $(this).css('background');
+        });
+
+// Choosing pen style by button
+        var pen = 'marker';
+
+        $('#markerPen').on('click', function(){
+            return pen = 'marker'
+        });
+
+        $('#waterColors').on('click', function(){
+            return pen = 'water';
+        });
+
+        $('#flashyPen').on('click', function(){
+            return pen = 'flashy';
+        });
+
+// Painting according to pen
+        section.
+            on('mouseenter', 'div', function(){
+                // marker pen
+                if (pen === 'marker') {
+                    $(this).css('background', color)
+                }
+                // water colors
+                else if (pen === 'water') {
+                    var thisOpacity = $(this).data('divObject').opacity;
+                    $(this).data('divObject', {opacity: thisOpacity + 0.25});
+
+                    $(this).css({
+                        'background': color,
+                        'opacity': $(this).data('divObject').opacity
+                    })
+                }
+                // flashy pen
+                else if (pen === 'flashy') {
+                    var rand1 = Math.ceil(Math.random()*256);
+                    var rand2 = Math.ceil(Math.random()*256);
+                    var rand3 = Math.ceil(Math.random()*256);
+
+                    $(this).css('background', 'rgba(' + rand1 + ', ' + rand2 + ', ' + rand3 + ', 1)');
+                }
+            });
+
+// Board reset
+        $('#clear').on('click', function() {
+            section.empty();
+            $('.tempColor').remove();
+            promptSize = prompt('Select a grid size (default = 100)');
+            setSize(promptSize || 100);
+        });
+
+// Generation of substitute palette colors
+        var step = 0.05;
+
+        for (i = 0; i < 6.3; i += step) {
+            var red =   Math.floor(Math.sin(i + 2) * 127 + 128);
+            var green = Math.floor(Math.sin(i + 0) * 127 + 128);
+            var blue =  Math.floor(Math.sin(i + 4) * 127 + 128);
+            var colorQty = 6.3 / step;
+
+            $('#newPalette')
+                .append($('<div></div>')
+                    .css({
+                        'height':'40px',
+                        'width': 500 / colorQty,
+                        'display': 'inline-block',
+                        'background': 'rgba(' + red + ', ' + green + ', ' + blue + ', 1)'
+                    })
+                )
+        };
+
+// Calling substitute palette
+        $('#addColor').on('click', function(){
+            $('#colors').animate({'top':'-65px'},'slow');
+            $('#newColors').animate({'top':'0'},'slow');
+        });
+
+// Colour sampling from substitute palette
+        $('#newPalette').on('mouseenter', 'div', function(){
+            $('.possColor')
+                .removeClass('cancel')
+                .addClass('palette')
+                .css('background', $(this).css('background'))
+                .empty(); // 'Cancel' button becomes sample color.
+        });
+
+        $('#newPalette').on('mouseleave', 'div', function(){
+            $('.possColor')
+                .removeClass('palette')
+                .addClass('cancel')
+                .css('background', 'rgb(221,221,221)')
+                .append($('<p>Cancel</p>')); // sample color returns to 'Cancel' button.
+        });
+
+// Exiting substitute palette function
+var exitPalette = function() {
+    $('#newColors').animate({'top':'60px'}, 'slow')
+    $('#colors').animate({'top':'0'}, 'slow')
+};
+
+// Adding a new color to palette
+$('#newPalette').on('click', 'div', function(){
+    $('.palette').siblings().css('box-shadow','none');
+    $('#colors')
+        .append($('<div></div>')
+            .addClass('tempColor')
+            .css({
+                'box-shadow':'0 0 20px black',
+                'background': $(this).css('background')
+            })
+        )
+    color = $(this).css('background') // ensures that the pen draws with this color
+
+    exitPalette();
+
+});
+
+// Exiting substitute palette by cancelling
+$('.cancel').on('click', function(){
+    exitPalette();
+});
+
+// Removing added colors from working palette
+$('#colors').on('dblclick', '.tempColor', function(){
+    $(this).fadeOut('fast');
+})
+
+    </script>
+
+
+  </body>
+</html>
