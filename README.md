@@ -1,7 +1,7 @@
 # Sketchpad
 
 View at: https://rawgit.com/stephenjukes/sketchpad/master/index.html
- !! Still not working perfectly in Firefox. For best results run in Chrome.
+Still not working perfectly in Firefox. For best results run in Chrome.
 
 Just like an etch-a-sketch, but with added fucntionality, such as:
 
